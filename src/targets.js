@@ -227,6 +227,16 @@ export const groups = [
         },
       },
       {
+        id: "grubruby",
+        name: "grubruby-jemalloc",
+        note: "Ruby base image with bundled jemalloc",
+        url: "https://github.com/kaspergrubbe/grubruby-jemalloc/releases",
+        probe: async (net, { version }) => {
+          const [release] = await atom(net, "kaspergrubbe/grubruby-jemalloc");
+          return dockerHub(net, "kaspergrubbe/grubruby-jemalloc", `${version}.${release.tag.replace(/^v/, "")}`);
+        },
+      },
+      {
         id: "bitnami",
         name: "bitnami/ruby",
         url: "https://github.com/bitnami/containers/commits/main/bitnami/ruby",

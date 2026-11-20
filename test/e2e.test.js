@@ -81,6 +81,13 @@ function upstream(request) {
   if (url.href === "https://raw.githubusercontent.com/phusion/passenger-docker/rel-3.2.4/image/ruby-3.4.13.sh") return new Response(null);
   if (url.hostname === "auth.docker.io" && url.searchParams.get("scope")?.startsWith("repository:phusion/")) return Response.json({ token: "token" });
   if (url.href === "https://registry-1.docker.io/v2/phusion/passenger-ruby40/manifests/3.2.4") return new Response(null);
+  if (url.href === "https://github.com/kaspergrubbe/grubruby-jemalloc/releases.atom") {
+    return new Response(
+      "<feed><entry><id>tag:github.com,2008:Repository/152586269/v9051</id><updated>2026-11-19T00:48:24Z</updated><title>Version 9051 released</title></entry></feed>",
+    );
+  }
+  if (url.hostname === "auth.docker.io" && url.searchParams.get("scope")?.startsWith("repository:kaspergrubbe/")) return Response.json({ token: "token" });
+  if (url.href === "https://registry-1.docker.io/v2/kaspergrubbe/grubruby-jemalloc/manifests/4.0.10.9051") return new Response(null);
   return new Response(null, { status: 404 });
 }
 
@@ -157,6 +164,13 @@ test("Passenger reports the Ruby once the latest passenger-docker release ships 
   assert.equal(passenger.results["3.4.13"].state, "waiting", "released, but the 3.4 image is not pushed yet");
   assert.equal(passenger.results["3.4.13"].checkedAt, data.lastRun);
   assert.equal(passenger.results["3.3.14"].state, "waiting");
+});
+
+test("grubruby reports the Ruby once its image is pushed under the latest grubruby release", async () => {
+  const data = await status();
+  const results = row(data, "grubruby").results;
+  assert.equal(results["4.0.10"].state, "found");
+  assert.equal(results["3.4.13"].state, "waiting");
 });
 
 test("a channel that does not have the release yet is waiting, with the time it was checked", async () => {
