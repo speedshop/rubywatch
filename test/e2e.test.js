@@ -83,7 +83,7 @@ function upstream(request) {
   if (url.href === "https://registry-1.docker.io/v2/phusion/passenger-ruby40/manifests/3.2.4") return new Response(null);
   if (url.href === "https://github.com/kaspergrubbe/grubruby-jemalloc/releases.atom") {
     return new Response(
-      "<feed><entry><id>tag:github.com,2008:Repository/152586269/v9051</id><updated>2026-11-19T00:48:24Z</updated><title>Version 9051 released</title></entry></feed>",
+      "<feed><entry><id>tag:github.com,2008:Repository/152586269/v9051</id><updated>2026-11-19T00:48:24Z</updated><title>Version 9051 released</title><content type=\"html\">&lt;li&gt;&lt;code&gt;4.0.10&lt;/code&gt; as &lt;code&gt;kaspergrubbe/grubruby-jemalloc:4.0.10.9051&lt;/code&gt;.&lt;/li&gt; &lt;li&gt;&lt;code&gt;3.4.13&lt;/code&gt; as &lt;code&gt;kaspergrubbe/grubruby-jemalloc:3.4.13.9051&lt;/code&gt;.&lt;/li&gt;</content></entry></feed>",
     );
   }
   if (url.hostname === "auth.docker.io" && url.searchParams.get("scope")?.startsWith("repository:kaspergrubbe/")) return Response.json({ token: "token" });
@@ -170,7 +170,10 @@ test("grubruby reports the Ruby once its image is pushed under the latest grubru
   const data = await status();
   const results = row(data, "grubruby").results;
   assert.equal(results["4.0.10"].state, "found");
-  assert.equal(results["3.4.13"].state, "waiting");
+  assert.equal(results["4.0.10"].at, "2026-11-19T00:48:24.000Z", "the time the release came out, not when it was first checked");
+  assert.equal(results["4.0.10"].exact, true);
+  assert.equal(results["3.4.13"].state, "waiting", "listed in the release, but the image is not pushed yet");
+  assert.equal(results["3.3.14"].state, "waiting", "not listed in any release");
 });
 
 test("a channel that does not have the release yet is waiting, with the time it was checked", async () => {

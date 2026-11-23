@@ -250,8 +250,11 @@ export const groups = [
         note: "Ruby base image with bundled jemalloc",
         url: "https://github.com/kaspergrubbe/grubruby-jemalloc/releases",
         probe: async (net, { version }) => {
-          const [release] = await atom(net, "kaspergrubbe/grubruby-jemalloc");
-          return dockerHub(net, "kaspergrubbe/grubruby-jemalloc", `${version}.${release.tag.replace(/^v/, "")}`);
+          const image = new RegExp(`grubruby-jemalloc:${version.replaceAll(".", "\\.")}\\.\\d+`);
+          const release = (await atom(net, "kaspergrubbe/grubruby-jemalloc")).filter((e) => image.test(e.content)).pop();
+          if (!release) return null;
+          const pushed = await dockerHub(net, "kaspergrubbe/grubruby-jemalloc", `${version}.${release.tag.replace(/^v/, "")}`);
+          return pushed && found(release.at);
         },
       },
       {
